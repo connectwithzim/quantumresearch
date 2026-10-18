@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="tr" dir="ltr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self' https: http://localhost:*; img-src 'self' data:; base-uri 'none'; form-action 'none'">
+  <title>Digital Experience & Social Decision Survey</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+ <main class="shell" id="surveyRoot">
+  <div class="language-switch" role="group" aria-label="Survey language">
+   <button data-lang="tr" type="button" class="lang-btn active">Türkçe</button>
+   <button data-lang="en" type="button" class="lang-btn">English</button>
+   <button data-lang="ar" type="button" class="lang-btn">العربية</button>
+  </div>
+  <header class="card intro"><span class="eyebrow">RESEARCH QUESTIONNAIRE</span><h1 id="title">Dijital Deneyim ve Sosyal Karar Anketi</h1><p id="subtitle"></p></header>
+  <section id="consentView" class="card" aria-labelledby="consentTitle">
+   <span class="step">01 / CONSENT</span><h2 id="consentTitle">Participation & consent</h2>
+   <div class="notice" id="consentInfo"></div>
+   <label class="consent-line"><input id="consentCheck" type="checkbox" autocomplete="off"><span id="consentLabel">I am participating voluntarily.</span></label>
+   <p id="consentWarning" class="help" role="status"></p>
+   <button type="button" class="primary" id="startBtn" disabled>Continue</button>
+  </section>
+  <section id="surveyView" hidden>
+    <div class="card"><span class="step">02 / BACKGROUND</span><h2 id="backgroundTitle"></h2><p class="muted" id="backgroundDesc"></p>
+       <div class="field"><label for="origin" id="originLabel"></label><input id="origin" name="origin_country" type="text" maxlength="100" required autocomplete="off"></div>
+       <div class="field"><label for="residence" id="residenceLabel"></label><input id="residence" name="residence_country" type="text" maxlength="100" required autocomplete="off"></div>
+       <fieldset><legend id="groupQuestion"></legend><div id="groupOptions" class="options"></div></fieldset>
+       <div id="groupField" class="field group-box" hidden><label for="groupName" id="groupNameLabel"></label><p id="groupNote" class="help"></p><input id="groupName" name="group_name" type="text" maxlength="100" autocomplete="off"></div>
+    </div>
+    <div class="card"><span class="step">03 / EVERYDAY DIGITAL EXPERIENCE</span><h2 id="m0Title"></h2><p class="muted" id="m0Desc"></p><div id="m0Questions"></div></div>
+    <div id="scenarioSections"></div>
+    <div class="card finish-card"><p class="help" id="saveMessage" role="status" aria-live="polite"></p><button class="primary" id="submitBtn" type="button"></button><p class="fineprint" id="saveHint"></p></div>
+  </section>
+  <section id="doneView" hidden class="card done"><div class="ok-icon">✓</div><h2 id="doneTitle"></h2><p id="doneDesc"></p></section>
+  <footer class="site-footer" id="footerText">Research participation is voluntary.</footer>
+ </main>
+ <main id="adminRoot" class="shell" hidden>
+   <div class="card intro"><span class="eyebrow">RESEARCHER ACCESS</span><h1>Survey control panel</h1><p class="muted">The URL parameter only opens this interface. A server-side token is required for every protected operation.</p></div>
+   <div class="card"><label for="adminToken">Researcher access token</label><input id="adminToken" type="password" autocomplete="off" placeholder="Paste your long Cloudflare ADMIN_TOKEN"><div class="actions"><button class="primary" type="button" id="loginBtn">Unlock dashboard</button><button class="secondary" type="button" id="logoutBtn">Clear token</button></div><p id="adminMessage" role="status"></p></div>
+   <div id="adminContent" hidden>
+    <div class="metrics"><div class="metric"><strong id="metricStarted">—</strong><span>Participants assigned</span></div><div class="metric"><strong id="metricSubmitted">—</strong><span>Responses saved</span></div><div class="metric"><strong id="metricAB">—</strong><span>A→B assigned</span></div><div class="metric"><strong id="metricBA">—</strong><span>B→A assigned</span></div><div class="metric"><strong id="metricPending">—</strong><span>Google Sheets sync pending</span></div></div>
+    <div class="card"><h2>Research data and recovery</h2><p id="backupStatus" class="muted"></p><div class="actions"><button id="refreshStats" type="button" class="secondary">Refresh status</button><button id="exportCsv" type="button" class="primary">Export CSV from D1</button><button id="retrySheets" type="button" class="secondary">Retry Sheets sync</button><button id="fullResync" type="button" class="secondary">Rebuild Sheets mirror</button><button id="runBackup" type="button" class="secondary">Create Drive/email backup now</button></div><p class="help">Backup archives are created by your Google Apps Script in the configured Google Drive folder. Check archive verification and email delivery status after every backup.</p></div>
+   </div>
+ </main>
+ <script type="module" src="./app.js"></script>
+</body>
+</html>
