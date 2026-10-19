@@ -24,15 +24,19 @@
    <button type="button" class="primary" id="startBtn" disabled>Continue</button>
   </section>
   <section id="surveyView" hidden>
-    <div class="card"><span class="step">02 / BACKGROUND</span><h2 id="backgroundTitle"></h2><p class="muted" id="backgroundDesc"></p>
-       <div class="field"><label for="origin" id="originLabel"></label><input id="origin" name="origin_country" type="text" maxlength="100" required autocomplete="off"></div>
-       <div class="field"><label for="residence" id="residenceLabel"></label><input id="residence" name="residence_country" type="text" maxlength="100" required autocomplete="off"></div>
-       <fieldset><legend id="groupQuestion"></legend><div id="groupOptions" class="options"></div></fieldset>
-       <div id="groupField" class="field group-box" hidden><label for="groupName" id="groupNameLabel"></label><p id="groupNote" class="help"></p><input id="groupName" name="group_name" type="text" maxlength="100" autocomplete="off"></div>
-    </div>
-    <div class="card"><span class="step">03 / EVERYDAY DIGITAL EXPERIENCE</span><h2 id="m0Title"></h2><p class="muted" id="m0Desc"></p><div id="m0Questions"></div></div>
-    <div id="scenarioSections"></div>
-    <div class="card finish-card"><p class="help" id="saveMessage" role="status" aria-live="polite"></p><button class="primary" id="submitBtn" type="button"></button><p class="fineprint" id="saveHint"></p></div>
+   <div class="card stage-guide" aria-live="polite"><span id="stageCount" class="step"></span><div class="stage-bars" aria-hidden="true"><span></span><span></span><span></span></div><p id="lockHelp" class="help"></p></div>
+   <div id="mPage">
+     <div class="card"><span class="step">01 / BACKGROUND</span><h2 id="backgroundTitle"></h2><p class="muted" id="backgroundDesc"></p>
+        <div class="field"><label for="origin" id="originLabel"></label><input id="origin" name="origin_country" type="text" maxlength="100" required autocomplete="off"></div>
+        <div class="field"><label for="residence" id="residenceLabel"></label><input id="residence" name="residence_country" type="text" maxlength="100" required autocomplete="off"></div>
+        <fieldset><legend id="groupQuestion"></legend><div id="groupOptions" class="options"></div></fieldset>
+        <div id="groupField" class="field group-box" hidden><label for="groupName" id="groupNameLabel"></label><p id="groupNote" class="help"></p><input id="groupName" name="group_name" type="text" maxlength="100" autocomplete="off"></div>
+     </div>
+     <div class="card"><h2 id="m0Title"></h2><p class="muted" id="m0Desc"></p><div id="m0Questions"></div></div>
+   </div>
+   <div id="scenarioPage" hidden><div id="scenarioSections"></div></div>
+   <div id="finishPage" class="card" hidden><h2 id="readyTitle"></h2><p id="readyText" class="muted"></p></div>
+   <div class="card finish-card"><p class="help" id="saveMessage" role="status" aria-live="polite"></p><button class="primary" id="nextBtn" type="button"></button><p class="fineprint" id="saveHint"></p></div>
   </section>
   <section id="doneView" hidden class="card done"><div class="ok-icon">✓</div><h2 id="doneTitle"></h2><p id="doneDesc"></p></section>
   <footer class="site-footer" id="footerText">Research participation is voluntary.</footer>

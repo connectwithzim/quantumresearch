@@ -1,132 +1,105 @@
 import { I18N } from './translations.js';
 import { API_BASE, RESEARCHER_CONTACT, RETENTION_NOTICE } from './config.js';
-
-const $ = (id) => document.getElementById(id);
-const state = { language: 'tr', assignment: null, token: null, submitting: false };
-const qs = (sel) => document.querySelector(sel);
-const MISS = {
-  tr: {consentTitle:'Katılım ve onam',consentLabel:'Gönüllü olarak katılıyorum.',consentText:'Katılımınız isteğe bağlıdır. Katılmamayı veya göndermeden önce ayrılmayı seçebilirsiniz. Bu anket dijital gözetim, kişisel güvenlik ve küçük gruplarda ortak eylem hakkında sorular içerir.\n\nKayıtlar bir araştırma kodu, ülke bilgileri ve (grup katılımında) seçtiğiniz grup adıyla saklanır. Araştırma ekibi sonuçları Cloudflare veritabanında, Google Sheets ve Google Drive yedeklerinde, isteğe bağlı olarak da e-posta yedeklerinde saklayabilir. IP adresiniz araştırma alanı olarak kaydedilmez; altyapı sağlayıcıları bağlantı metaverilerini işleyebilir. Grup adında kişisel bilgi kullanmayın. Soru sıraları araştırma amaçlı değişebilir.\n\nİletişim: {email}\nVeri saklama: {retention}',continue:'Ankete devam et',required:'İlerlemek için gönüllü katılımınızı onaylayın.', groupNote:'İstediğiniz grup adını seçebilirsiniz; tanımlama amacıyla her üyeden birebir aynı grup adını yazması istenir.', saveHint:'Başarı mesajı yalnızca yanıt araştırma veritabanına kaydedildikten sonra gösterilir. Google Sheets eşitlemesi gecikebilir.', saveError:'Yanıt kaydedilemedi. Sayfayı kapatmadan bağlantıyı kontrol edip yeniden deneyin.', fillAll:'Lütfen tüm zorunlu alanları doldurun.', groupRequired:'Grup katılımında grup adı zorunludur.', alreadyDone:'Bu tarayıcıdaki katılım daha önce kaydedildi.',another:'Yeni katılımcı başlat',getting:'Bağlantı kuruluyor…', setup:'Araştırma sunucusu henüz yapılandırılmadı. Lütfen araştırmacıyla iletişime geçin.', warning:'Bu metin, araştırmanız için etik kurul/onam incelemesinin yerini tutmaz.', sectionTitle:'Bölüm {n}: Kararlar ve tercihler', footer:'Katılım gönüllüdür. İletişim: {email}', consentStep:'01 / ONAM',backgroundStep:'02 / KATILIMCI', digitalStep:'03 / DİJİTAL DENEYİM',saved:'Yanıt araştırma veritabanına kaydedildi.'},
-  en: {consentTitle:'Participation and consent',consentLabel:'I am participating voluntarily.',consentText:'Taking part is voluntary. You may decline or stop before submitting. Questions address digital surveillance, personal safety, and collective action in small groups.\n\nWe store a study code, country details and (if participating in a group) your chosen group name with answers. The study stores records in a Cloudflare database, synchronizes them to Google Sheets, and creates Google Drive backups; optional email backup files may also be sent. We do not record IP addresses as survey fields, although infrastructure providers may process connection metadata. Do not enter personal information in a group name. Question presentation order may vary for research purposes.\n\nResearcher contact: {email}\nRetention: {retention}',continue:'Continue to questionnaire',required:'Please confirm voluntary participation to continue.',groupNote:'You can choose whatever group name you want, but every member is requested to put the exact same group name for identification purposes.',saveHint:'Success is shown only after the research database confirms storage. Google Sheets synchronization may follow later.',saveError:'Your answers could not be saved. Check your connection and retry without closing this page.',fillAll:'Please answer every required question.',groupRequired:'Please enter a group name if you participate as a group.',alreadyDone:'A response from this browser session was already saved.',another:'Start another participant',getting:'Connecting to the survey server…',setup:'The research server has not been configured. Please contact the researcher.',warning:'This notice is a template requiring research ethics and privacy review before launch.',sectionTitle:'Part {n}: Decisions and preferences',footer:'Participation is voluntary. Contact: {email}',consentStep:'01 / CONSENT',backgroundStep:'02 / BACKGROUND',digitalStep:'03 / DAILY DIGITAL EXPERIENCE',saved:'Your response was saved to the research database.'},
-  ar: {consentTitle:'المشاركة والموافقة',consentLabel:'أشارك بمحض إرادتي.',consentText:'المشاركة طوعية. يمكنك رفض المشاركة أو الانسحاب قبل إرسال الإجابات. تشمل الأسئلة المراقبة الرقمية والسلامة الشخصية والعمل الجماعي في مجموعات صغيرة.\n\nتُحفظ الإجابات برمز بحثي وبيانات البلد واسم المجموعة الذي تختاره عند المشاركة الجماعية. تُحفظ البيانات في قاعدة بيانات Cloudflare وتُنسخ إلى Google Sheets وتُنشأ نسخ احتياطية في Google Drive ويمكن إرسال نسخ بالبريد الإلكتروني. لا نسجل عنوان IP كحقل في الاستبيان، لكن مزودي الخدمة قد يعالجون بيانات الاتصال. لا تضع معلومات شخصية في اسم المجموعة. قد يختلف ترتيب الأسئلة لأغراض البحث.\n\nالتواصل: {email}\nالاحتفاظ بالبيانات: {retention}',continue:'متابعة إلى الاستبيان',required:'يرجى تأكيد المشاركة الطوعية للمتابعة.',groupNote:'يمكنك اختيار أي اسم للمجموعة، ولكن يُطلب من كل عضو إدخال اسم المجموعة نفسه تماماً لأغراض التعريف.',saveHint:'لا تظهر رسالة النجاح إلا بعد تأكيد الحفظ في قاعدة البيانات؛ قد تتأخر المزامنة مع Google Sheets.',saveError:'تعذر حفظ الإجابات. تحقق من الاتصال وحاول مجدداً دون إغلاق الصفحة.',fillAll:'يرجى الإجابة عن جميع الأسئلة المطلوبة.',groupRequired:'يرجى كتابة اسم المجموعة للمشاركة الجماعية.',alreadyDone:'تم حفظ إجابة سابقة من جلسة المتصفح هذه.',another:'بدء مشارك جديد',getting:'جارٍ الاتصال بخادم الاستبيان…',setup:'لم تُضبط خدمة البحث بعد. يرجى التواصل مع الباحث.',warning:'هذا النص نموذج ويحتاج إلى مراجعة الأخلاقيات والخصوصية قبل الإطلاق.',sectionTitle:'الجزء {n}: القرارات والتفضيلات',footer:'المشاركة طوعية. التواصل: {email}',consentStep:'01 / الموافقة',backgroundStep:'02 / معلومات المشارك',digitalStep:'03 / التجربة الرقمية',saved:'تم حفظ الإجابة في قاعدة بيانات البحث.'}
+const $=id=>document.getElementById(id);
+const qs=selector=>document.querySelector(selector);
+const state={language:'tr',token:null,assignment:null,stage:'M',submitting:false};
+const SCREEN_VALS=['<2h','2-4h','4-6h','>6h'];
+const ui={
+ tr:{consentTitle:'Katılım ve onam',consentLabel:'Gönüllü olarak katılıyorum.', consentText:'Katılım isteğe bağlıdır. Bu çalışma dijital gözetim, kişisel güvenlik ve küçük gruplarda ortak eylem hakkında sorular içerir. Soru sıraları araştırma amaçlı değişebilir.\n\nBölümler tek tek gösterilir. Devam ettiğinizde o bölümün yanıtları araştırma veritabanına kaydedilir ve değiştirilemez. Anketi tamamlamadan ayrılırsanız kısmi yanıtlarınız son etkinlikten 30 gün sonra silinir; kısmi yanıtlar Google Sheets ve yedeklere gönderilmez. Tamamlanan kayıtlar için aşağıdaki saklama politikası geçerlidir.\n\nKayıtlarda ülke ve varsa grup adı bulunur. Grup adında kişisel bilgi kullanmayın. IP adresi araştırma yanıt alanı olarak kaydedilmez; altyapı sağlayıcıları bağlantı bilgilerini işleyebilir.\n\nİletişim: {email}\nTamamlanan veri saklama: {retention}', continue:'Ankete devam et',required:'Lütfen gönüllü katılımınızı onaylayın.',groupNote:'İstediğiniz grup adını seçebilirsiniz; her üyeden tanımlama için birebir aynı grup adını yazması istenir.',saveHint:'Devam ettiğinizde bu bölüm kaydedilir ve kilitlenir. Önceki bölümlere dönemezsiniz.',saveError:'Kaydetme başarısız. Sayfayı kapatmadan bağlantıyı kontrol edip yeniden deneyin.',fillAll:'Lütfen bu sayfadaki tüm zorunlu alanları tamamlayın.',groupRequired:'Lütfen grup adını yazın.',getting:'Sunucuya bağlanılıyor…',setup:'Araştırma sunucusu yapılandırılmadı.',warning:'Bu açıklama etik kurul incelemesinin yerine geçmez.',footer:'Katılım gönüllüdür. İletişim: {email}',lockHelp:'Devam ettiğinizde mevcut bölümün yanıtları kalıcı olarak kilitlenir.',stage:'Bölüm {n} / 3', next:'Kaydet ve devam et',final:'Yanıtları gönder',readyTitle:'Yanıtlarınız kilitlendi',readyText:'Tüm bölümler tamamlandı. Nihai kaydı tamamlamak için Gönder düğmesine basın.',submitting:'Kaydediliyor…',tyDesc:'Yanıtlarınız araştırma veritabanına kaydedildi.',another:'Yeni katılımcı başlat'},
+ en:{consentTitle:'Participation and consent',consentLabel:'I am participating voluntarily.', consentText:'Participation is voluntary. This study asks about digital surveillance, personal safety, and collective action in small groups. Question order may vary for research purposes.\n\nSections appear one at a time. When you continue, that section’s answers are saved in the research database and cannot be changed. If you leave without finishing, partial answers are deleted 30 days after your last activity; they are not copied to Google Sheets or backups. Completed records follow the retention policy below.\n\nCountry details and a group name, if provided, are included in records. Do not include personal information in group names. IP addresses are not collected as answer fields; infrastructure providers may process connection metadata.\n\nResearcher: {email}\nCompleted data retention: {retention}',continue:'Continue to questionnaire',required:'Please confirm voluntary participation.',groupNote:'You can choose whatever group name you want, but every member is requested to put the exact same group name for identification purposes.',saveHint:'When you continue, this section is saved and locked. You cannot return to earlier sections.',saveError:'Unable to save. Check your connection and try again without closing this page.',fillAll:'Please complete all required fields on this page.',groupRequired:'Please enter a group name.',getting:'Connecting to survey server…',setup:'Research server is not configured.',warning:'This statement does not replace institutional ethics review.',footer:'Participation is voluntary. Contact: {email}',lockHelp:'Continuing permanently locks the answers on this page.',stage:'Section {n} of 3',next:'Save and continue',final:'Submit responses',readyTitle:'Your answers are locked',readyText:'All sections are complete. Click Submit to finalize your response.',submitting:'Saving…',tyDesc:'Your responses were saved to the research database.',another:'Start another participant'},
+ ar:{consentTitle:'المشاركة والموافقة',consentLabel:'أشارك بمحض إرادتي.', consentText:'المشاركة طوعية. تتناول الدراسة المراقبة الرقمية والسلامة الشخصية والعمل الجماعي في مجموعات صغيرة. قد يختلف ترتيب الأسئلة لأغراض البحث.\n\nتظهر الأقسام واحداً تلو الآخر. عند المتابعة تُحفظ إجابات القسم في قاعدة بيانات البحث ولا يمكن تعديلها. إذا غادرت قبل إكمال الاستبيان، تُحذف الإجابات الجزئية بعد 30 يوماً من آخر نشاط، ولا تُنسخ إلى جداول Google أو النسخ الاحتياطية. تخضع السجلات المكتملة لسياسة الاحتفاظ أدناه.\n\nتتضمن السجلات معلومات البلد واسم المجموعة إن وُجد. لا تستخدم بيانات شخصية في اسم المجموعة. لا يُجمع عنوان IP ضمن حقول الإجابة، وقد يعالج مزودو البنية التحتية بيانات الاتصال.\n\nالباحث: {email}\nالاحتفاظ بالبيانات المكتملة: {retention}',continue:'متابعة الاستبيان',required:'يرجى تأكيد المشاركة الطوعية.',groupNote:'يمكنك اختيار أي اسم للمجموعة، لكن يُطلب من كل عضو إدخال الاسم نفسه تماماً لأغراض التعريف.',saveHint:'عند المتابعة تُحفظ إجابات هذا القسم وتُقفل، ولا يمكنك العودة إلى الأقسام السابقة.',saveError:'تعذر الحفظ. تحقق من الاتصال وأعد المحاولة دون إغلاق الصفحة.',fillAll:'يرجى ملء جميع الحقول المطلوبة في هذه الصفحة.',groupRequired:'يرجى إدخال اسم المجموعة.',getting:'جارٍ الاتصال بالخادم…',setup:'لم يُضبط خادم البحث.',warning:'هذه المعلومات لا تغني عن مراجعة أخلاقيات البحث المؤسسية.',footer:'المشاركة طوعية. التواصل: {email}',lockHelp:'عند المتابعة تُقفل إجابات هذه الصفحة بصورة دائمة.',stage:'القسم {n} من 3',next:'حفظ ومتابعة',final:'إرسال الإجابات',readyTitle:'تم قفل إجاباتك',readyText:'اكتملت جميع الأقسام. اضغط إرسال لإتمام التسجيل.',submitting:'جارٍ الحفظ…',tyDesc:'حُفظت إجاباتك في قاعدة بيانات البحث.',another:'بدء مشارك جديد'}
 };
-const MAIN_KEYS = ['A1','A2','A3','B1','B2','B3'];
-const SCREEN_VALS = ['<2h','2-4h','4-6h','>6h'];
-function translate(k){return MISS[state.language][k];}
-function setText(id, value) { const el=$(id); if(el) el.textContent=value; }
-function makeOptions(name, values, labels, scale=false) {
-  const box=document.createElement('div'); box.className=scale?'scale-options':'options';
-  for(let i=0;i<values.length;i++){
-    const label=document.createElement('label');label.className='option';
-    const input=document.createElement('input');input.type='radio';input.name=name;input.value=String(values[i]);input.required=true;
-    const text=document.createElement('span');text.textContent=String(labels[i]);
-    label.append(input,text);box.append(label);
-  }
-  return box;
-}
-function makeQuestion(name, question, values, labels, scale=false, low='', high=''){
-  const wrap=document.createElement('div');wrap.className='question';
-  const heading=document.createElement('label');heading.className='question-title';heading.textContent=question;
-  wrap.append(heading,makeOptions(name,values,labels,scale));
-  if(scale){const notes=document.createElement('div');notes.className='scale-notes';const l=document.createElement('span');l.textContent=low;const r=document.createElement('span');r.textContent=high;notes.append(l,r);wrap.append(notes);}
-  return wrap;
-}
-function existingChoices(){return Object.fromEntries([...document.querySelectorAll('#surveyView input[type=radio]:checked')].map(el=>[el.name,el.value]));}
-function restoreChoices(values){for(const [k,v] of Object.entries(values)){const el=[...document.querySelectorAll('#surveyView input[type=radio]')].find(x=>x.name===k&&x.value===v);if(el)el.checked=true;}}
-function renderQuestions(){
-  const chosen=existingChoices(),t=I18N[state.language];
-  const groups=$('groupOptions');groups.replaceChildren();groups.append(makeOptions('participation_mode',['Group','Individual'],[t.groupYes,t.groupNo]));
-  const m0=$('m0Questions');m0.replaceChildren();
-  m0.append(makeQuestion('M0_1',t.m01Q,SCREEN_VALS,[t.m01A,t.m01B,t.m01C,t.m01D]));
-  m0.append(makeQuestion('M0_2',t.m02Q,[1,2,3,4,5],[1,2,3,4,5],true,t.m02Low,t.m02High));
-  m0.append(makeQuestion('M0_3',t.m03Q,[1,2,3,4,5],[1,2,3,4,5],true,t.m03Low,t.m03High));
-  const container=$('scenarioSections');container.replaceChildren();
-  const order=state.assignment?.assigned_form==='FORM_BA'?['B','A']:['A','B'];
-  order.forEach((part,i)=>{
-    const card=document.createElement('div');card.className='card';
-    const step=document.createElement('span');step.className='step';step.textContent=String(i+4).padStart(2,'0')+' / '+(state.language==='tr'?'SORULAR':state.language==='ar'?'الأسئلة':'QUESTIONS');card.append(step);
-    const title=document.createElement('h2');title.textContent=translate('sectionTitle').replace('{n}',String(i+2));card.append(title);
-    const desc=document.createElement('p');desc.className='muted';desc.textContent=t['sec'+part+'Desc'];card.append(desc);
-    for(let j=1;j<=3;j++){const code=part+j;card.append(makeQuestion(code,t[code.toLowerCase()+'Q'],[1,0],[t.yes,t.no]));}
-    container.append(card);
-  });
-  restoreChoices(chosen);toggleGroup();
-}
-function toggleGroup(){const isGroup=qs('input[name=participation_mode]:checked')?.value==='Group';$('groupField').hidden=!isGroup;$('groupName').required=isGroup;if(!isGroup){$('groupName').value='';}}
-function updateLanguage(lang){
-  state.language=lang;const t=I18N[lang];document.documentElement.lang=lang;document.documentElement.dir=t.dir;
-  document.querySelectorAll('.lang-btn').forEach(b=>{b.classList.toggle('active',b.dataset.lang===lang);b.setAttribute('aria-pressed',String(b.dataset.lang===lang));});
-  for(const [id,key] of Object.entries({title:'title',subtitle:'subtitle',backgroundTitle:'bgTitle',backgroundDesc:'bgDesc',originLabel:'originLabel',residenceLabel:'residenceLabel',groupQuestion:'groupLabel',groupNameLabel:'groupNameLabel',m0Title:'m0Title',m0Desc:'m0Desc',submitBtn:'submit',doneTitle:'tyTitle',doneDesc:'tyDesc'})){setText(id,t[key]);}
-  setText('consentTitle',translate('consentTitle'));setText('consentLabel',translate('consentLabel'));
-  setText('consentInfo',translate('consentText').replace('{email}',RESEARCHER_CONTACT).replace('{retention}',RETENTION_NOTICE));
-  setText('consentWarning',configured()?'':translate('warning'));setText('startBtn',translate('continue'));setText('groupNote',translate('groupNote'));
-  setText('saveHint',translate('saveHint'));
-  setText('originLabel',t.originLabel);setText('residenceLabel',t.residenceLabel);
-  $('origin').placeholder=t.originPlaceholder;$('residence').placeholder=t.residencePlaceholder;$('groupName').placeholder=t.groupNamePlaceholder;
-  setText('footerText',translate('footer').replace('{email}',RESEARCHER_CONTACT));renderQuestions();
+function u(k){return ui[state.language][k]||'';}
+function setText(id,text){if($(id))$(id).textContent=text;}
+function makeOptions(name,vals,labels,scale=false){const box=document.createElement('div');box.className=scale?'scale-options':'options';
+ vals.forEach((val,i)=>{const label=document.createElement('label');label.className='option';const el=document.createElement('input');el.type='radio';el.name=name;el.value=String(val);el.required=true;const txt=document.createElement('span');txt.textContent=String(labels[i]);label.append(el,txt);box.append(label);});return box;}
+function makeQuestion(code,title,values,labels,help,scale=false,low='',high=''){
+ const div=document.createElement('div');div.className='question';const titleEl=document.createElement('label');titleEl.className='question-title';titleEl.textContent=title;
+ const helper=document.createElement('p');helper.className='question-help';helper.textContent=help;
+ div.append(titleEl,helper,makeOptions(code,values,labels,scale));
+ if(scale){const note=document.createElement('div');note.className='scale-notes';const left=document.createElement('span'),right=document.createElement('span');left.textContent=low;right.textContent=high;note.append(left,right);div.append(note);}return div;
 }
 function configured(){return /^https:\/\/[\w.-]+/.test(API_BASE)&&!API_BASE.includes('YOUR-WORKER')&&RESEARCHER_CONTACT!=='researcher@example.org'&&!RETENTION_NOTICE.startsWith('Research records will be retained according to');}
-async function request(path, options={}){
-  if(!configured()) throw new Error(translate('setup'));
-  const ctrl=new AbortController();const timeout=setTimeout(()=>ctrl.abort(),12000);
-  try{const r=await fetch(API_BASE+path,{...options,signal:ctrl.signal,headers:{'Content-Type':'application/json',...options.headers},cache:'no-store'});
-    let result;try{result=await r.json();}catch{result={error:'Server returned an unexpected response.'};}
-    if(!r.ok||!result.ok)throw new Error(result.error||('Request failed: HTTP '+r.status));return result;
-  }finally{clearTimeout(timeout);}
+async function request(path,opts={}){if(!configured())throw Error(u('setup'));const c=new AbortController(),timeout=setTimeout(()=>c.abort(),18000);
+ try{const r=await fetch(API_BASE+path,{...opts,signal:c.signal,headers:{'Content-Type':'application/json',...opts.headers},cache:'no-store'});let d;try{d=await r.json();}catch{throw Error('Unexpected server response');}if(!r.ok||!d.ok)throw Error(d.error||'HTTP '+r.status);return d;}finally{clearTimeout(timeout);}}
+function stageNumber(stage){if(stage==='M')return 1;if(stage==='FINISH'||stage==='DONE')return 3;const first=state.assignment==='FORM_BA'?'B':'A';return stage===first?2:3;}
+function renderStage(){const stage=state.stage;const t=I18N[state.language];$('consentView').hidden=true;$('surveyView').hidden=false;$('doneView').hidden=true;
+ const number=stageNumber(stage);setText('stageCount',u('stage').replace('{n}',number));document.querySelectorAll('.stage-bars span').forEach((bar,i)=>bar.classList.toggle('active',i<number));
+ $('mPage').hidden=stage!=='M';$('scenarioPage').hidden=!['A','B'].includes(stage);$('finishPage').hidden=stage!=='FINISH';
+ $('scenarioSections').replaceChildren();
+ if(stage==='M'){
+    const group=$('groupOptions');group.replaceChildren();group.append(makeOptions('participation_mode',['Group','Individual'],[t.groupYes,t.groupNo]));
+    const box=$('m0Questions');box.replaceChildren();
+    box.append(makeQuestion('M0_1',t.m01Q,SCREEN_VALS,[t.m01A,t.m01B,t.m01C,t.m01D],t.m01Help));
+    box.append(makeQuestion('M0_2',t.m02Q,[1,2,3,4,5],[1,2,3,4,5],t.m02Help,true,t.m02Low,t.m02High));
+    box.append(makeQuestion('M0_3',t.m03Q,[1,2,3,4,5],[1,2,3,4,5],t.m03Help,true,t.m03Low,t.m03High));
+    toggleGroup();
+ }else if(['A','B'].includes(stage)){
+    const box=document.createElement('div');box.className='card';const heading=document.createElement('h2');heading.textContent=u('stage').replace('{n}',number);box.append(heading);
+    // Deliberately do not display either scenario label or descriptions that reveal the experimental hypothesis.
+    for(let i=1;i<=3;i++){const code=stage+i;box.append(makeQuestion(code,t[code.toLowerCase()+'Q'],[1,0],[t.yes,t.no],t[code.toLowerCase()+'Help']));}
+    $('scenarioSections').append(box);
+ }
+ setText('readyTitle',u('readyTitle'));setText('readyText',u('readyText'));setText('lockHelp',u('lockHelp'));
+ setText('nextBtn',stageNumber(stage)===3?u('final'):u('next'));
+ setText('saveMessage','');setText('saveHint',stage==='FINISH'?'':u('saveHint'));window.scrollTo(0,0);
 }
-function randomToken(){if(globalThis.crypto?.randomUUID)return crypto.randomUUID();throw Error('A secure browser connection is required.');}
-async function start(){
-  if(!$('consentCheck').checked){setText('consentWarning',translate('required'));return;}
-  $('startBtn').disabled=true;setText('consentWarning',translate('getting'));
-  try{
-    state.token=localStorage.getItem('survey_v2_token')||randomToken();
-    // Persist before network I/O so a timeout cannot allocate a second ID on retry.
-    localStorage.setItem('survey_v2_token',state.token);
-    const assigned=await request('/api/start',{method:'POST',body:JSON.stringify({token:state.token,consent:true})});
-    // Only the anonymous token, never survey answers, is stored in this browser.
-    state.assignment=assigned;
-    if(assigned.submitted){showComplete();return;}
-    renderQuestions();$('consentView').hidden=true;$('surveyView').hidden=false;window.scrollTo({top:0,behavior:'auto'});
-  }catch(err){setText('consentWarning',err.message);$('startBtn').disabled=false;}
+function toggleGroup(){const isGroup=qs('input[name="participation_mode"]:checked')?.value==='Group';$('groupField').hidden=!isGroup;$('groupName').required=isGroup;if(!isGroup)$('groupName').value='';}
+function updateLanguage(language){
+ const existing=Object.fromEntries([...document.querySelectorAll('#surveyView input[type=radio]:checked')].map(x=>[x.name,x.value]));
+ state.language=language;const t=I18N[language];document.documentElement.lang=language;document.documentElement.dir=t.dir;
+ document.querySelectorAll('.lang-btn').forEach(b=>{b.classList.toggle('active',b.dataset.lang===language);b.setAttribute('aria-pressed',String(b.dataset.lang===language));});
+ for(const [id,key] of Object.entries({title:'title',subtitle:'subtitle',backgroundTitle:'bgTitle',backgroundDesc:'bgDesc',originLabel:'originLabel',residenceLabel:'residenceLabel',groupQuestion:'groupLabel',groupNameLabel:'groupNameLabel',m0Title:'m0Title',m0Desc:'m0Desc',doneTitle:'tyTitle'}))setText(id,t[key]);
+ setText('consentTitle',u('consentTitle'));setText('consentLabel',u('consentLabel'));
+ setText('consentInfo',u('consentText').replace('{email}',RESEARCHER_CONTACT).replace('{retention}',RETENTION_NOTICE));
+ setText('consentWarning',configured()?'':u('warning'));setText('startBtn',u('continue'));setText('groupNote',u('groupNote'));
+ setText('originLabel',t.originLabel);setText('residenceLabel',t.residenceLabel);
+ $('origin').placeholder=t.originPlaceholder;$('residence').placeholder=t.residencePlaceholder;$('groupName').placeholder=t.groupNamePlaceholder;
+ setText('footerText',u('footer').replace('{email}',RESEARCHER_CONTACT));
+ if(state.token&&state.assignment&&state.stage!=='DONE'){
+   renderStage();
+   for(const [name,value] of Object.entries(existing)){const input=[...document.querySelectorAll('#surveyView input[type=radio]')].find(x=>x.name===name&&x.value===value);if(input)input.checked=true;}
+   toggleGroup();
+ }
 }
-function validateAnswers(){
-  const required=['origin','residence'];for(const id of required){const el=$(id);if(!el.value.trim()){el.focus();throw Error(translate('fillAll'));}}
-  const checks=['participation_mode','M0_1','M0_2','M0_3',...MAIN_KEYS];
-  for(const k of checks){const el=qs(`input[name="${k}"]:checked`);if(!el){const first=qs(`input[name="${k}"]`);first?.focus();throw Error(translate('fillAll'));}}
-  if(qs('input[name=participation_mode]:checked').value==='Group'&&!$('groupName').value.trim()){$('groupName').focus();throw Error(translate('groupRequired'));}
-  return {
-    language:state.language,origin_country:$('origin').value.trim(),residence_country:$('residence').value.trim(),
-    participation_mode:qs('input[name=participation_mode]:checked').value,
-    group_name:qs('input[name=participation_mode]:checked').value==='Group'?$('groupName').value.trim():'',
-    consent:true,
-    M0_1:qs('input[name=M0_1]:checked').value,
-    ...Object.fromEntries(['M0_2','M0_3',...MAIN_KEYS].map(k=>[k,Number(qs(`input[name=${k}]:checked`).value)]))
-  };
+function uuid(){if(crypto?.randomUUID)return crypto.randomUUID();throw Error('Secure browser required');}
+async function start(){if(!$('consentCheck').checked){setText('consentWarning',u('required'));return;}
+ $('startBtn').disabled=true;setText('consentWarning',u('getting'));
+ try{state.token=localStorage.getItem('survey_v2_token')||uuid();localStorage.setItem('survey_v2_token',state.token);
+ const d=await request('/api/start',{method:'POST',body:JSON.stringify({token:state.token,consent:true})});state.assignment=d.assigned_form;state.stage=d.stage||'M';
+ if(d.submitted||state.stage==='DONE')showComplete();else renderStage();
+ }catch(err){setText('consentWarning',err.message);$('startBtn').disabled=false;}
 }
-async function submit(){
-  if(state.submitting)return;
-  try{
-    const answers=validateAnswers();state.submitting=true;$('submitBtn').disabled=true;setText('saveMessage',I18N[state.language].submitting);
-    await request('/api/submit',{method:'POST',body:JSON.stringify({token:state.token,answers})});
-    showComplete();
-  }catch(err){setText('saveMessage',translate('saveError')+' '+err.message);}
-  finally{state.submitting=false;$('submitBtn').disabled=false;setText('submitBtn',I18N[state.language].submit);}
+function selected(name){const el=qs('input[name="'+name+'"]:checked');if(!el){qs('input[name="'+name+'"]')?.focus();throw Error(u('fillAll'));}return el.value;}
+function collect(){if(state.stage==='M'){
+    if(!$('origin').value.trim()||!$('residence').value.trim())throw Error(u('fillAll'));
+    const mode=selected('participation_mode');if(mode==='Group'&&!$('groupName').value.trim())throw Error(u('groupRequired'));
+    return {language:state.language,origin_country:$('origin').value.trim(),residence_country:$('residence').value.trim(),participation_mode:mode,group_name:mode==='Group'?$('groupName').value.trim():'',consent:true,M0_1:selected('M0_1'),M0_2:Number(selected('M0_2')),M0_3:Number(selected('M0_3'))};
+ }
+ if(state.stage==='A'||state.stage==='B')return Object.fromEntries([1,2,3].map(i=>[state.stage+i,Number(selected(state.stage+i))]));
+ return {};
 }
-function showComplete(){
-  $('consentView').hidden=true;$('surveyView').hidden=true;$('doneView').hidden=false;
-  setText('doneDesc',I18N[state.language].tyDesc);
-  if(!$('anotherBtn')){const b=document.createElement('button');b.id='anotherBtn';b.className='secondary';b.type='button';b.addEventListener('click',()=>{
-    if(!confirm(state.language==='tr'?'Bu tarayıcıda yeni bir katılımcı başlatılsın mı?':state.language==='ar'?'هل تريد بدء مشارك جديد على هذا الجهاز؟':'Start a new participant on this device?'))return;
-    localStorage.removeItem('survey_v2_token');state.token=null;state.assignment=null;$('consentCheck').checked=false;$('startBtn').disabled=true;$('doneView').hidden=true;$('consentView').hidden=false;document.querySelectorAll('#surveyView input[type=text]').forEach(e=>e.value='');document.querySelectorAll('#surveyView input[type=radio]').forEach(e=>e.checked=false);setText('consentWarning',translate('warning'));window.scrollTo(0,0);
-  });$('doneView').append(b);}setText('anotherBtn',translate('another'));
-  window.scrollTo(0,0);
+async function next(){if(state.submitting)return;state.submitting=true;$('nextBtn').disabled=true;setText('saveMessage',u('submitting'));
+ try{
+   if(state.stage==='FINISH'){await request('/api/finish',{method:'POST',body:JSON.stringify({token:state.token})});showComplete();return;}
+   const section=state.stage,answers=collect();const res=await request('/api/section',{method:'POST',body:JSON.stringify({token:state.token,section,answers})});
+   state.stage=res.stage;
+   if(state.stage==='FINISH'){try{await request('/api/finish',{method:'POST',body:JSON.stringify({token:state.token})});showComplete();return;}catch{renderStage();setText('saveMessage',u('saveError'));return;}}
+   if(state.stage==='DONE')showComplete();else renderStage();
+ }catch(err){setText('saveMessage',u('saveError')+' '+err.message);}
+ finally{state.submitting=false;$('nextBtn').disabled=false;}
 }
-function initSurvey(){
-  document.querySelectorAll('.lang-btn').forEach(el=>el.addEventListener('click',()=>updateLanguage(el.dataset.lang)));
-  $('consentCheck').addEventListener('change',()=>{$('startBtn').disabled=!$('consentCheck').checked;});
-  $('startBtn').addEventListener('click',start);$('submitBtn').addEventListener('click',submit);
-  $('groupOptions').addEventListener('change',toggleGroup);
-  updateLanguage('tr');
+function showComplete(){state.stage='DONE';$('consentView').hidden=true;$('surveyView').hidden=true;$('doneView').hidden=false;setText('doneDesc',u('tyDesc'));
+ if(!$('anotherBtn')){const b=document.createElement('button');b.id='anotherBtn';b.type='button';b.className='secondary';b.addEventListener('click',()=>{
+  if(!confirm(state.language==='tr'?'Bu cihazda yeni katılımcı başlatılsın mı?':state.language==='ar'?'بدء مشارك جديد على هذا الجهاز؟':'Start a new participant on this device?'))return;
+  localStorage.removeItem('survey_v2_token');state.token=null;state.assignment=null;state.stage='M';$('consentCheck').checked=false;$('startBtn').disabled=true;
+  document.querySelectorAll('#surveyView input[type=text]').forEach(x=>x.value='');document.querySelectorAll('#surveyView input[type=radio]').forEach(x=>x.checked=false);
+  $('doneView').hidden=true;$('consentView').hidden=false;window.scrollTo(0,0);
+ });$('doneView').append(b);}setText('anotherBtn',u('another'));window.scrollTo(0,0);
 }
+function initSurvey(){document.querySelectorAll('.lang-btn').forEach(b=>b.addEventListener('click',()=>updateLanguage(b.dataset.lang)));
+ $('consentCheck').addEventListener('change',()=>$('startBtn').disabled=!$('consentCheck').checked);
+ $('startBtn').addEventListener('click',start);$('nextBtn').addEventListener('click',next);$('groupOptions').addEventListener('change',toggleGroup);updateLanguage('tr');}
 async function initAdmin(){
   $('surveyRoot').hidden=true;$('adminRoot').hidden=false;let token='';
   const info=msg=>setText('adminMessage',msg);
